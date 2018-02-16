@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
 <title>Unify Coding Challenge</title>
-<script>
+<script src="http://code.jquery.com/jquery-git.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/2.3.1/jsencrypt.min.js"></script>
+<script type="text/javascript">
 
+ $(function () { //Question 1 - This function will generate a image 128x128
 fetch('https://www.random.org/integers/?num=10000&min=0&max=10000&col=1&base=10&format=plain&rnd=new')
   .then((result) => result.text())
   .then(result => result.toString())
@@ -12,14 +15,11 @@ fetch('https://www.random.org/integers/?num=10000&min=0&max=10000&col=1&base=10&
     var wd = 128
     var ht = 128
     var buffer = new Uint8ClampedArray(wd * ht * 4);
-  var imgIn2D = document.createElement('canvas')
+    var imgIn2D = document.createElement('canvas')
     var temp = imgIn2D.getContext('2d');
     imgIn2D.wd = wd;
     imgIn2D.ht = ht;
-  
     var idata = temp.createImageData(wd, ht);
-  
-
     for(var i = 0; i < ht; i++) {
       for(var j = 0; j < wd; j++) {
         var pos = (i * wd + j) * 4;
@@ -29,24 +29,70 @@ fetch('https://www.random.org/integers/?num=10000&min=0&max=10000&col=1&base=10&
         buffer[pos+3] = (Math.floor(result[i*j] / 4)) % 255
       }
     }
-
     idata.data.set(buffer);
-
     temp.putImageData(idata, 0, 0);
-
     var dataUri = imgIn2D.toDataURL();
-
     var img = document.querySelector('#imageTag')
-
     img.src = dataUri
-
   })
+});
+
+ $(function () {  // Question 2 - This function returns the content of wav file
+        var url = 'https://api.random.org/json-rpc/1/invoke';
+        var apiKey = 'd784a44e-e9aa-4ae1-884b-37d7fa48283c';
+        var reqBody = {"jsonrpc":"2.0",
+        "method":"generateBlobs",
+        "params":{"apiKey":apiKey,
+        "n":10,
+        "size":128,
+        "format":"base64"},
+        "id":9946}
+          $.ajax({
+              type: "POST",
+              url: "https://api.random.org/json-rpc/1/invoke",
+              // The key needs to match your method's input parameter (case-sensitive).
+              data: JSON.stringify(reqBody),
+              contentType: "application/json; charset=utf-8",
+              dataType: "json",
+              success: function(data){var output = JSON.stringify(data)
+               $('#wavFile').text(output);},
+              failure: function(errMsg) {
+                  alert(errMsg);
+              }
+          });
+
+      });
+
+
+ $(function () {  // Question 3 - This function generates RSA keys
+        var generateKeys = function () {
+            var keySize = 512;
+            var crypt = new JSEncrypt({ default_key_size: keySize });
+            crypt.getKey();
+            $('#privkey').text(crypt.getPrivateKey());
+            $('#pubkey').text(crypt.getPublicKey());
+        };
+        // If they wish to generate new keys.
+        $('#generate').click(generateKeys);
+        generateKeys();
+      });
 
 </script>
 </head>
 <body>
-
+<h1> This is Q1 - Generation of 128x128 image</h1>
 <img id='imageTag'></img>
-
+<br/><br/>
+<h1> This is Q2 - Displays Private Key </h1>
+<div id='privkey'></div>
+<br/>
+<h1> Displays Public Keys </h1> 
+<div id='pubkey'></div>
+<br/>
+<h3>Button Generates new Keys</h3>
+<button id='generate'>Generate New Keys</button>
+<br/>
+<h1> This is Q3 - The wav file contents</h1>
+<div id='wavFile'></div>
 </body>
 </html>
